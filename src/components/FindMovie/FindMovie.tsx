@@ -42,7 +42,8 @@ export const FindMovie: React.FC<Props> = ({ onAdd }) => {
 
           const { Title, Plot, Poster, imdbID } = res as MovieData;
 
-          const imgUrl = Poster && Poster.trim() !== '' ? Poster : DEFAULT_IMG;
+          const imgUrl =
+            Poster && Poster.trim() !== 'N/A' ? Poster : DEFAULT_IMG;
 
           const normalizedMovie = {
             title: Title,
