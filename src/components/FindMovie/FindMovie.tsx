@@ -1,7 +1,12 @@
 import React from 'react';
 import './FindMovie.scss';
+import { Movie } from '../../types/Movie';
 
-export const FindMovie: React.FC = () => {
+type Props = {
+  onAdd: (value: Movie) => void;
+};
+
+export const FindMovie: React.FC<Props> = ({ onAdd }) => {
   return (
     <>
       <form className="find-movie">
