@@ -22,30 +22,39 @@ export const App = () => {
       .then((response: MovieData | ResponseError) => {
         if ('Error' in response) {
           setError(true);
+
           return;
         }
+
         setError(false);
         setFindedMovie({
           title: response.Title,
           description: response.Plot,
-          imgUrl: response.Poster === 'N/A' ? 'https://via.placeholder.com/360x270.png?text=no%20preview' : response.Poster,
-          imdbUrl: `https://www.imdb.com/title/${response.imdbID}/`,
+          imgUrl:
+            response.Poster === 'N/A'
+              ? 'https://via.placeholder.com/360x270.png?text=no%20preview'
+              : response.Poster,
+          imdbUrl: `https://www.imdb.com/title/${response.imdbID}`,
           imdbId: response.imdbID,
-        })
+        });
       })
       .finally(() => setLoading(false));
-  }
+  };
 
   const handleAddButton = () => {
     if (findedMovie) {
-      const addedMovie = movies.find(movie => movie.imdbId === findedMovie.imdbId);
+      const addedMovie = movies.find(
+        movie => movie.imdbId === findedMovie.imdbId,
+      );
+
       if (!addedMovie) {
         setMovies([...movies, findedMovie]);
       }
+
       setQuery('');
       setFindedMovie(null);
     }
-  }
+  };
 
   return (
     <div className="page">
