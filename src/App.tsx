@@ -1,15 +1,27 @@
 import { useState } from 'react';
+
 import './App.scss';
+
 import { MoviesList } from './components/MoviesList';
 import { FindMovie } from './components/FindMovie';
+
 import { Movie } from './types/Movie';
 
 export const App = () => {
   const [movies, setMovies] = useState<Movie[]>([]);
 
-  function addMovie(newMovie: Movie): void {
-    if (!movies.some(movie => movie.imdbId === newMovie.imdbId)) {
-      setMovies(prevMovies => [...prevMovies, newMovie]);
+  function onMoviesAdd(newMovie: Movie) {
+    let hasMovie = false;
+
+    for (const movie of movies) {
+      if (movie.imdbId === newMovie.imdbId) {
+        hasMovie = true;
+        break;
+      }
+    }
+
+    if (!hasMovie) {
+      setMovies(currentMovies => [...currentMovies, newMovie]);
     }
   }
 
@@ -20,7 +32,7 @@ export const App = () => {
       </div>
 
       <div className="sidebar">
-        <FindMovie onAddMovie={addMovie} />
+        <FindMovie onMoviesAdd={onMoviesAdd} />
       </div>
     </div>
   );
