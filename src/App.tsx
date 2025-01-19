@@ -30,7 +30,6 @@ export const App = () => {
       <div className="page-content">
         <MoviesList movies={movies} />
       </div>
-
       <div className="sidebar">
         <FindMovie onMoviesAdd={onMoviesAdd} />
       </div>
