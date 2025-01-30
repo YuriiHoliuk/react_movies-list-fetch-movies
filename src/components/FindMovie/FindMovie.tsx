@@ -2,13 +2,15 @@ import React, { useState, useEffect } from 'react';
 import './FindMovie.scss';
 import { Movie } from '../../types/Movie';
 import { MovieCard } from '../MovieCard'; // Додано імпорт
+import classNames from 'classnames';
 
 type Props = {
   addNewFilm: (movie: Movie) => void;
 };
 
 const API_URL = 'http://www.omdbapi.com/?apikey=bb65b2a2';
-const defaultPicture = 'https://via.placeholder.com/300x450?text=No+Image';
+const defaultPicture =
+  'https://via.placeholder.com/360x270.png?text=no%20preview';
 
 export const FindMovie: React.FC<Props> = ({ addNewFilm }) => {
   const [query, setQuery] = useState('');
@@ -16,11 +18,25 @@ export const FindMovie: React.FC<Props> = ({ addNewFilm }) => {
   const [isSubmitDisabled, setIsSubmitDisabled] = useState(true);
   const [movie, setMovie] = useState<Movie | null>(null);
   const [error, setError] = useState('');
+  const [isLOading, setIsLoading] = useState(false);
 
   const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setQuery(event.target.value);
     setHasQueryError(false);
   };
+
+  // const handleSearch = (event: React.MouseEvent<HTMLButtonElement>) => {
+  //   event.preventDefault();
+
+  //   const normalizedQuery = query.trim().toLowerCase();
+
+  //   setIsLoading(true);
+
+  //   addNewFilm(normalizedQuery)
+  //     .then((API_URL) => {
+
+  //   })
+  // }
 
   useEffect(() => {
     setIsSubmitDisabled(query.trim().length === 0);
@@ -34,6 +50,8 @@ export const FindMovie: React.FC<Props> = ({ addNewFilm }) => {
 
       return;
     }
+
+    setIsLoading(true);
 
     try {
       const response = await fetch(`${API_URL}&t=${encodeURIComponent(query)}`);
@@ -57,6 +75,8 @@ export const FindMovie: React.FC<Props> = ({ addNewFilm }) => {
       }
     } catch {
       setError('Something went wrong. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -97,26 +117,30 @@ export const FindMovie: React.FC<Props> = ({ addNewFilm }) => {
             </p>
           )}
         </div>
-
         <div className="field is-grouped">
           <div className="control">
             <button
               data-cy="searchButton"
               type="submit"
-              className="button is-light"
+              className={classNames('button', 'is-light', {
+                'is-loading': isLOading,
+              })}
               disabled={isSubmitDisabled}
             >
-              Find a movie
+              {movie ? 'Search again' : 'Find a movie'}
             </button>
           </div>
 
           {movie && (
             <div className="control">
               <button
-                data-cy="searchButton"
+                data-cy="addButton"
                 type="submit"
                 className="button is-primary"
-                onClick={() => hanldeAddMovie()}
+                onClick={() => {
+                  hanldeAddMovie();
+                  setQuery('');
+                }}
               >
                 Add to the list
               </button>
