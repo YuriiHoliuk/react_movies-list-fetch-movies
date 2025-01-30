@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import './FindMovie.scss';
 import { Movie } from '../../types/Movie';
-import { MovieCard } from '../MovieCard'; // Додано імпорт
+import { MovieCard } from '../MovieCard';
 import classNames from 'classnames';
+import { getMovie } from '../../api';
 
 type Props = {
   addNewFilm: (movie: Movie) => void;
 };
 
-const API_URL = 'http://www.omdbapi.com/?apikey=bb65b2a2';
 const defaultPicture =
   'https://via.placeholder.com/360x270.png?text=no%20preview';
 
@@ -18,25 +18,12 @@ export const FindMovie: React.FC<Props> = ({ addNewFilm }) => {
   const [isSubmitDisabled, setIsSubmitDisabled] = useState(true);
   const [movie, setMovie] = useState<Movie | null>(null);
   const [error, setError] = useState('');
-  const [isLOading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setQuery(event.target.value);
     setHasQueryError(false);
   };
-
-  // const handleSearch = (event: React.MouseEvent<HTMLButtonElement>) => {
-  //   event.preventDefault();
-
-  //   const normalizedQuery = query.trim().toLowerCase();
-
-  //   setIsLoading(true);
-
-  //   addNewFilm(normalizedQuery)
-  //     .then((API_URL) => {
-
-  //   })
-  // }
 
   useEffect(() => {
     setIsSubmitDisabled(query.trim().length === 0);
@@ -52,35 +39,29 @@ export const FindMovie: React.FC<Props> = ({ addNewFilm }) => {
     }
 
     setIsLoading(true);
+    const data = await getMovie(query);
 
-    try {
-      const response = await fetch(`${API_URL}&t=${encodeURIComponent(query)}`);
-      const data = await response.json();
+    if (!data) {
+      setMovie(null);
+      setError(data.Error);
+    } else {
+      const foundMovie: Movie = {
+        title: data.Title,
+        description: data.Plot,
+        imgUrl:
+          data.Poster && data.Poster !== 'N/A' ? data.Poster : defaultPicture,
+        imdbUrl: `https://www.imdb.com/title/${data.imdbID}`,
+        imdbId: data.imdbID,
+      };
 
-      if (data.Response === 'False') {
-        setMovie(null);
-        setError("Can't find a movie with such a title");
-      } else {
-        const foundMovie: Movie = {
-          title: data.Title,
-          description: data.Plot,
-          imgUrl:
-            data.Poster && data.Poster !== 'N/A' ? data.Poster : defaultPicture,
-          imdbUrl: `https://www.imdb.com/title/${data.imdbID}`,
-          imdbId: data.imdbID,
-        };
-
-        setMovie(foundMovie);
-        setError('');
-      }
-    } catch {
-      setError('Something went wrong. Please try again.');
-    } finally {
-      setIsLoading(false);
+      setMovie(foundMovie);
+      setError('');
     }
+
+    setIsLoading(false);
   };
 
-  const hanldeAddMovie = () => {
+  const handleAddMovie = () => {
     if (movie) {
       addNewFilm(movie);
       setMovie(null);
@@ -123,7 +104,7 @@ export const FindMovie: React.FC<Props> = ({ addNewFilm }) => {
               data-cy="searchButton"
               type="submit"
               className={classNames('button', 'is-light', {
-                'is-loading': isLOading,
+                'is-loading': isLoading,
               })}
               disabled={isSubmitDisabled}
             >
@@ -135,12 +116,9 @@ export const FindMovie: React.FC<Props> = ({ addNewFilm }) => {
             <div className="control">
               <button
                 data-cy="addButton"
-                type="submit"
+                type="button"
                 className="button is-primary"
-                onClick={() => {
-                  hanldeAddMovie();
-                  setQuery('');
-                }}
+                onClick={handleAddMovie}
               >
                 Add to the list
               </button>
