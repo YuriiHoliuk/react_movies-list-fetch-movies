@@ -41,7 +41,7 @@ export const FindMovie: React.FC<Props> = ({ addNewFilm }) => {
     setIsLoading(true);
     const data = await getMovie(query);
 
-    if (!data) {
+    if ('Error' in data) {
       setMovie(null);
       setError(data.Error);
     } else {
@@ -65,6 +65,7 @@ export const FindMovie: React.FC<Props> = ({ addNewFilm }) => {
     if (movie) {
       addNewFilm(movie);
       setMovie(null);
+      setQuery('');
     }
   };
 
@@ -88,7 +89,10 @@ export const FindMovie: React.FC<Props> = ({ addNewFilm }) => {
             />
           </div>
           {hasQueryError && (
-            <p className="help is-danger" data-cy="errorMessage">
+            <p
+              className={`help ${hasQueryError ? 'is-danger' : ''}`}
+              data-cy="errorMessage"
+            >
               Please enter a movie title.
             </p>
           )}
