@@ -23,6 +23,7 @@ export const FindMovie: React.FC<Props> = ({ addNewFilm }) => {
   const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setQuery(event.target.value);
     setHasQueryError(false);
+    setError('');
   };
 
   useEffect(() => {
