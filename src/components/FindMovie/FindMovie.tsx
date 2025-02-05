@@ -1,9 +1,12 @@
+import classNames from 'classnames';
 import { Movie } from '../../types/Movie';
 import { MovieCard } from '../MovieCard';
 import './FindMovie.scss';
 
 interface Props {
   movie: Movie | null;
+  error: boolean;
+  isLoading: boolean;
   searchTerm: string;
   handleSearchSet: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleSubmit: (event: React.FormEvent) => void;
@@ -12,6 +15,8 @@ interface Props {
 
 export const FindMovie: React.FC<Props> = ({
   movie,
+  error,
+  isLoading,
   searchTerm,
   handleSearchSet,
   handleSubmit,
@@ -33,13 +38,19 @@ export const FindMovie: React.FC<Props> = ({
               type="text"
               id="movie-title"
               placeholder="Enter a title to search"
-              className="input is-danger"
+              className={classNames('input', {
+                'is-danger': error,
+              })}
             />
           </div>
 
-          <p className="help is-danger" data-cy="errorMessage">
-            Can&apos;t find a movie with such a title
-          </p>
+          {error ? (
+            <p className="help is-danger" data-cy="errorMessage">
+              Can&apos;t find a movie with such a title
+            </p>
+          ) : (
+            ''
+          )}
         </div>
 
         <div className="field is-grouped">
@@ -47,7 +58,11 @@ export const FindMovie: React.FC<Props> = ({
             <button
               data-cy="searchButton"
               type="submit"
-              className="button is-light"
+              className={classNames('button', {
+                'is-loading': isLoading,
+                'is-light': !isLoading,
+              })}
+              disabled={!searchTerm}
             >
               Find a movie
             </button>

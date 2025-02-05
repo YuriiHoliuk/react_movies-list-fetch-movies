@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import './App.scss';
 import { MoviesList } from './components/MoviesList';
 import { FindMovie } from './components/FindMovie';
@@ -10,7 +10,16 @@ export const App = () => {
   const [movie, setMovie] = useState<Movie | null>(null);
   const [movieList, setMovieList] = useState<Movie[]>([]);
 
+  const [error, setError] = useState(false);
+
   const [searchTerm, setSearchTerm] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (error) {
+      setError(false);
+    }
+  }, [searchTerm]);
 
   const handleSearchSet = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
@@ -18,17 +27,32 @@ export const App = () => {
 
   const handleSubmitSearch = (event: React.FormEvent) => {
     event.preventDefault();
+    setIsLoading(true);
+    setError(false);
+
     if (!searchTerm) {
+      setIsLoading(false);
+
       return;
     }
 
-    getMovie(searchTerm).then(innitMovie => {
-      if (!innitMovie || 'Error' in innitMovie) {
-        return;
-      }
+    getMovie(searchTerm)
+      .then(innitMovie => {
+        if (!innitMovie || 'Error' in innitMovie) {
+          setError(true);
+          setMovie(null);
 
-      setMovie(movieDataToMovie(innitMovie));
-    });
+          return;
+        }
+
+        setMovie(movieDataToMovie(innitMovie));
+      })
+      .catch(() => {
+        setError(true);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   };
 
   const handleSubmitAddToList = () => {
@@ -36,14 +60,16 @@ export const App = () => {
       return;
     }
 
-    setMovieList([...movieList, movie]);
-    setSearchTerm('');
-  };
+    setMovieList(prevList => {
+      if (prevList.some(prevMovie => prevMovie.imdbId === movie.imdbId)) {
+        return prevList;
+      }
 
-  // eslint-disable-next-line no-console
-  console.log('SearchTerm:', searchTerm);
-  // eslint-disable-next-line no-console
-  console.log('MovieList:', movieList);
+      return [...prevList, movie];
+    });
+    setSearchTerm('');
+    setMovie(null);
+  };
 
   return (
     <div className="page">
@@ -54,6 +80,8 @@ export const App = () => {
       <div className="sidebar">
         <FindMovie
           movie={movie}
+          error={error}
+          isLoading={isLoading}
           searchTerm={searchTerm}
           handleSearchSet={handleSearchSet}
           handleSubmit={handleSubmitSearch}
