@@ -16,9 +16,7 @@ export const App = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (error) {
-      setError(false);
-    }
+    setError(false);
   }, [searchTerm]);
 
   const handleSearchSet = (event: React.ChangeEvent<HTMLInputElement>) => {
