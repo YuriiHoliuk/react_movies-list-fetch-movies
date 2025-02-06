@@ -4,7 +4,6 @@ import { getMovie } from '../../api';
 import { Movie } from '../../types/Movie';
 import { MovieCard } from '../MovieCard';
 import { MovieData } from '../../types/MovieData';
-import { ResponseError } from '../../types/ReponseError';
 
 type Props = {
   addMovieToList: (movie: Movie) => void;
@@ -39,13 +38,17 @@ export const FindMovie: React.FC<Props> = ({ addMovieToList }) => {
       .then(res => {
         if ('Response' in res && res.Response === 'False') {
           setError(true);
+
           return null;
         }
 
         return formatMovieData(res as MovieData);
       })
       .then(res => {
-        if (!res) return;
+        if (!res) {
+          return;
+        }
+
         setMovie(res);
       })
       .finally(() => setLoading(false));
